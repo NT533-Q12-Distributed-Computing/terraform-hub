@@ -105,8 +105,10 @@ resource "aws_security_group" "observability" {
 
 # EKS Control Plane Security Group 
 resource "aws_security_group" "eks_control_plane" {
+  count  = var.eks_cluster_security_group_id == null ? 0 : 1
   name   = "eks-control-plane-sg"
   vpc_id = var.vpc_id
+
 
   # Control plane ↔ Node communication
   ingress {
@@ -126,6 +128,7 @@ resource "aws_security_group" "eks_control_plane" {
 
 # EKS Node Group Security Group
 resource "aws_security_group" "eks_nodes" {
+  count  = var.eks_cluster_security_group_id == null ? 0 : 1
   name   = "eks-nodes-sg"
   vpc_id = var.vpc_id
 
@@ -161,14 +164,18 @@ resource "aws_security_group" "eks_nodes" {
   }
 }
 
+# Rule for kubectl from VPN
 resource "aws_security_group_rule" "eks_api_from_vpn" {
+  count = (
+    var.vpn_cidr != null && var.eks_cluster_security_group_id != null
+  ) ? 1 : 0
+
   type              = "ingress"
   protocol          = "tcp"
   from_port         = 443
   to_port           = 443
 
   cidr_blocks       = [var.vpn_cidr]
-
   security_group_id = var.eks_cluster_security_group_id
 
   description       = "Allow kubectl access to EKS private endpoint from VPN"

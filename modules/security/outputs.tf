@@ -11,9 +11,17 @@ output "observability_sg_id" {
 }
 
 output "eks_control_plane_sg_id" {
-  value = aws_security_group.eks_control_plane.id
+  value = (
+    length(aws_security_group.eks_control_plane) > 0
+    ? aws_security_group.eks_control_plane[0].id
+    : null
+  )
 }
 
 output "eks_node_sg_id" {
-  value = aws_security_group.eks_nodes.id
+  value = (
+    length(aws_security_group.eks_nodes) > 0
+    ? aws_security_group.eks_nodes[0].id
+    : null
+  )
 }
