@@ -20,6 +20,17 @@ variable "public_key_path" {
   type = string
 }
 
+variable "ssh_key_path" {
+  type        = string
+  description = "Path to SSH private key for Ansible"
+}
+
+# Ansible
+variable "ansible_inventory_dir" {
+  type        = string
+  description = "Base directory for Ansible inventories"
+}
+
 # =========================
 # AMI
 # =========================

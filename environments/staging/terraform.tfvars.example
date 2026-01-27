@@ -4,6 +4,7 @@ region = "ap-southeast-1"
 # SSH key 
 key_name        = "k0s-key"
 public_key_path = "../../../key_pair/k0s_key.pub"
+ssh_key_path    = "../../../key_pair/k0s_key"
 
 # Networking
 vpc_cidr = "10.0.0.0/16"
@@ -16,3 +17,6 @@ ami = "ami-0df7a207adb9748c7"
 k0s_instance_type           = "t3.small"
 observability_instance_type = "t3.small"
 openvpn_instance_type       = "t3.micro"
+
+# Ansible
+ansible_inventory_dir = "../../../ansible-hub/inventories/staging"
