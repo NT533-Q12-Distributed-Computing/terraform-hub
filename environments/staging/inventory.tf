@@ -2,7 +2,7 @@
 # Kubernetes (k0s) Inventory - Staging
 # =====================================================
 resource "local_file" "kubernetes_inventory" {
-  filename = "${path.root}/../../../ansible/inventories/staging/kubernetes.ini"
+  filename = "${path.root}/../../../ansible-hub/inventories/staging/kubernetes.ini"
 
   content = <<-EOF
 [k0s_controller]
@@ -23,7 +23,7 @@ EOF
 # Observability Inventory - Staging
 # =====================================================
 resource "local_file" "observability_inventory" {
-  filename = "${path.root}/../../../ansible/inventories/staging/observability.ini"
+  filename = "${path.root}/../../../ansible-hub/inventories/staging/observability.ini"
 
   content = <<-EOF
 # ================================
@@ -45,7 +45,7 @@ EOF
 # OpenVPN Inventory - Staging
 # =====================================================
 resource "local_file" "openvpn_inventory" {
-  filename = "${path.root}/../../../ansible/inventories/staging/openvpn.ini"
+  filename = "${path.root}/../../../ansible-hub/inventories/staging/openvpn.ini"
 
   content = <<-EOF
 [openvpn]
