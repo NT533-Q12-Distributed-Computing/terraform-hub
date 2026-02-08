@@ -43,8 +43,11 @@ locals {
   # Subnet calculation configuration
   subnet_newbits = 8
 
+  # Private subnets (5)
   private_subnet_indexes = [1, 2, 3, 4, 5]
-  public_subnet_index    = 10
+
+  # Public subnets (3 AZs)
+  public_subnet_indexes  = [10, 11, 12]
 
   # Private subnets (Kubernetes nodes, observability, internal services)
   private_subnets = [
@@ -52,13 +55,12 @@ locals {
     cidrsubnet(var.vpc_cidr, local.subnet_newbits, i)
   ]
 
-  # Public subnet (OpenVPN, NAT / Internet access)
-  public_subnet = cidrsubnet(
-    var.vpc_cidr,
-    local.subnet_newbits,
-    local.public_subnet_index
-  )
+  public_subnets = [
+    for i in local.public_subnet_indexes :
+    cidrsubnet(var.vpc_cidr, local.subnet_newbits, i)
+  ]
 }
+
 
 # =========================
 # SSH KEY PAIR
@@ -80,7 +82,7 @@ module "network" {
   vpc_cidr        = var.vpc_cidr
   azs             = local.azs
   private_subnets = local.private_subnets
-  public_subnet   = local.public_subnet
+  public_subnets   = local.public_subnets
 }
 
 # =========================
@@ -135,7 +137,22 @@ module "openvpn" {
   ami              = data.aws_ami.ubuntu_2204.id
   instance_type    = var.openvpn_instance_type
   key_name         = module.keypair.key_name
-  public_subnet_id = module.network.public_subnet_id
+  public_subnet_id = module.network.public_subnet_ids[2]
   openvpn_sg_id    = module.security.openvpn_sg_id
 }
 
+# =========================
+# APPLICATION LOAD BALANCER
+# =========================
+module "alb" {
+  source = "../../modules/alb"
+
+  name        = "staging-k0s-alb"
+  vpc_id      = module.network.vpc_id
+  subnet_ids = module.network.public_subnet_ids
+  alb_sg_id   = module.security.alb_sg_id
+
+  target_type  = "instance"
+  target_port  = 30080     # NGINX Ingress NodePort
+  instance_ids = module.k0s.instance_ids
+}

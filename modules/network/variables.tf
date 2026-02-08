@@ -4,7 +4,9 @@ variable "azs" {}
 
 variable "private_subnets" {}
 
-variable "public_subnet" {}
+variable "public_subnets" {
+  type = list(string)
+}
 
 # CIDR assigned to VPN clients by OpenVPN server
 variable "vpn_cidr" {
