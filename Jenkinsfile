@@ -67,31 +67,31 @@ pipeline {
       }
     }
 
-    // stage('Checkov Security Scan') {
-    //     steps {
-    //         sh '''
-    //         checkov -d . \
-    //         --framework terraform \
-    //         --skip-path environments/staging/terraform.tfstate \
-    //         --quiet
-    //         '''
-    //     }
-    // }
+  //   stage('Checkov Security Scan') {
+  //       steps {
+  //           sh '''
+  //           checkov -d . \
+  //           --framework terraform \
+  //           --skip-path environments/staging/terraform.tfstate \
+  //           --quiet
+  //           '''
+  //       }
+  //   }
 
 
-    stage('Terraform Plan (dry-run)') {
-      steps {
-        dir("environments/${params.ENV}") {
-          sh '''
-          terraform plan \
-            -input=false \
-            -lock=false \
-            -no-color
-          '''
-        }
-      }
-    }
-  }
+  //   stage('Terraform Plan (dry-run)') {
+  //     steps {
+  //       dir("environments/${params.ENV}") {
+  //         sh '''
+  //         terraform plan \
+  //           -input=false \
+  //           -lock=false \
+  //           -no-color
+  //         '''
+  //       }
+  //     }
+  //   }
+  // }
 
   post {
     success {
