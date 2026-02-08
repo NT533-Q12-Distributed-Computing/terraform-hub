@@ -47,7 +47,7 @@ locals {
   private_subnet_indexes = [1, 2, 3, 4, 5]
 
   # Public subnets (3 AZs)
-  public_subnet_indexes  = [10, 11, 12]
+  public_subnet_indexes = [10, 11, 12]
 
   # Private subnets (Kubernetes nodes, observability, internal services)
   private_subnets = [
@@ -82,7 +82,7 @@ module "network" {
   vpc_cidr        = var.vpc_cidr
   azs             = local.azs
   private_subnets = local.private_subnets
-  public_subnets   = local.public_subnets
+  public_subnets  = local.public_subnets
 }
 
 # =========================
@@ -90,10 +90,10 @@ module "network" {
 # SECURITY GROUPS
 # =========================
 module "security" {
-  source      = "../../modules/security"
-  vpc_id      = module.network.vpc_id
-  vpc_cidr    = var.vpc_cidr
-  my_ip_cidr  = local.my_ip_cidr
+  source     = "../../modules/security"
+  vpc_id     = module.network.vpc_id
+  vpc_cidr   = var.vpc_cidr
+  my_ip_cidr = local.my_ip_cidr
 }
 
 # =========================
@@ -115,14 +115,14 @@ module "k0s" {
 # PROMETHEUS / LOKI / TEMPO / GRAFANA
 # =========================
 module "observability" {
-  source             = "../../modules/compute/observability"
+  source = "../../modules/compute/observability"
 
-  ami                = data.aws_ami.ubuntu_2204.id
-  instance_type      = var.observability_instance_type
-  key_name           = module.keypair.key_name
+  ami           = data.aws_ami.ubuntu_2204.id
+  instance_type = var.observability_instance_type
+  key_name      = module.keypair.key_name
 
   # Dedicated subnets for observability stack
-  private_subnet_ids  = slice(module.network.private_subnet_ids, 3, 5)
+  private_subnet_ids = slice(module.network.private_subnet_ids, 3, 5)
 
   observability_sg_id = module.security.observability_sg_id
 }
@@ -147,12 +147,12 @@ module "openvpn" {
 module "alb" {
   source = "../../modules/alb"
 
-  name        = "staging-k0s-alb"
-  vpc_id      = module.network.vpc_id
+  name       = "staging-k0s-alb"
+  vpc_id     = module.network.vpc_id
   subnet_ids = module.network.public_subnet_ids
-  alb_sg_id   = module.security.alb_sg_id
+  alb_sg_id  = module.security.alb_sg_id
 
   target_type  = "instance"
-  target_port  = 30080     # NGINX Ingress NodePort
+  target_port  = 30080 # NGINX Ingress NodePort
   instance_ids = module.k0s.instance_ids
 }

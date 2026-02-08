@@ -95,8 +95,8 @@ resource "aws_security_group" "observability" {
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
+    from_port = 0
+    to_port   = 0
     # allow all outbound
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
@@ -170,15 +170,15 @@ resource "aws_security_group_rule" "eks_api_from_vpn" {
     var.vpn_cidr != null && var.eks_cluster_security_group_id != null
   ) ? 1 : 0
 
-  type              = "ingress"
-  protocol          = "tcp"
-  from_port         = 443
-  to_port           = 443
+  type      = "ingress"
+  protocol  = "tcp"
+  from_port = 443
+  to_port   = 443
 
   cidr_blocks       = [var.vpn_cidr]
   security_group_id = var.eks_cluster_security_group_id
 
-  description       = "Allow kubectl access to EKS private endpoint from VPN"
+  description = "Allow kubectl access to EKS private endpoint from VPN"
 }
 
 resource "aws_security_group" "alb" {

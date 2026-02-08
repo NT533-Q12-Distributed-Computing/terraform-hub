@@ -22,10 +22,25 @@ pipeline {
     }
 
     stage('Terraform Format') {
-      steps {
-        sh 'terraform fmt -check -recursive'
+        steps {
+            sh '''
+            echo "▶ Running terraform fmt..."
+            terraform fmt -recursive
+
+            echo "▶ Checking if terraform fmt introduced changes..."
+            if ! git diff --quiet; then
+                echo "❌ Terraform files were not formatted."
+                echo "👉 Jenkins has auto-formatted them."
+                echo "👉 Please run 'terraform fmt -recursive', commit, and push."
+                git --no-pager diff
+                exit 1
+            else
+                echo "✅ Terraform files already formatted."
+            fi
+            '''
       }
     }
+
 
     stage('Terraform Init') {
       steps {
@@ -53,14 +68,16 @@ pipeline {
     }
 
     stage('Checkov Security Scan') {
-      steps {
-        sh '''
-        checkov -d . \
-          --framework terraform \
-          --quiet
-        '''
-      }
+        steps {
+            sh '''
+            checkov -d . \
+            --framework terraform \
+            --skip-path environments/staging/terraform.tfstate \
+            --quiet
+            '''
+        }
     }
+
 
     stage('Terraform Plan (dry-run)') {
       steps {

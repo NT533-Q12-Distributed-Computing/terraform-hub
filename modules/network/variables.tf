@@ -25,6 +25,6 @@ variable "openvpn_eni_id" {
 # Used only in production for Kubernetes-related subnet tagging.
 # Null in k0s ( staging environment).
 variable "cluster_name" {
-  type = string
+  type    = string
   default = null
 }

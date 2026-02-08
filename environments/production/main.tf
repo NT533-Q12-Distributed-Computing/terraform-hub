@@ -21,7 +21,7 @@ module "network" {
   # OpenVPN integration
   # =========================
   # Route: 10.8.0.0/24 -> OpenVPN ENI
-  openvpn_eni_id  = module.openvpn.eni_id
+  openvpn_eni_id = module.openvpn.eni_id
 }
 
 # =========================
@@ -102,7 +102,7 @@ module "iam_eks" {
 module "eks" {
   source = "../../modules/compute/eks"
 
-  cluster_name        = var.cluster_name
+  cluster_name       = var.cluster_name
   kubernetes_version = var.kubernetes_version
 
   private_subnet_ids = module.network.private_subnet_ids
@@ -134,7 +134,7 @@ module "eks_addons" {
 module "iam_alb" {
   source = "../../modules/iam/alb"
 
-  cluster_name       = module.eks.cluster_name
+  cluster_name      = module.eks.cluster_name
   oidc_provider_arn = aws_iam_openid_connect_provider.eks.arn
   oidc_issuer_url   = aws_iam_openid_connect_provider.eks.url
 }
@@ -142,7 +142,7 @@ module "iam_alb" {
 module "iam_karpenter" {
   source = "../../modules/iam/karpenter"
 
-  cluster_name       = module.eks.cluster_name
+  cluster_name      = module.eks.cluster_name
   oidc_provider_arn = aws_iam_openid_connect_provider.eks.arn
   oidc_issuer_url   = aws_iam_openid_connect_provider.eks.url
 }
@@ -153,8 +153,8 @@ module "iam_karpenter" {
 module "eks_ingress" {
   source = "../../modules/eks-ingress"
 
-  cluster_name             = module.eks.cluster_name
-  region                   = var.region
-  vpc_id                   = module.network.vpc_id
-  alb_controller_role_arn  = module.iam_alb.alb_controller_role_arn
+  cluster_name            = module.eks.cluster_name
+  region                  = var.region
+  vpc_id                  = module.network.vpc_id
+  alb_controller_role_arn = module.iam_alb.alb_controller_role_arn
 }
