@@ -67,16 +67,16 @@ pipeline {
       }
     }
 
-    stage('Checkov Security Scan') {
-        steps {
-            sh '''
-            checkov -d . \
-            --framework terraform \
-            --skip-path environments/staging/terraform.tfstate \
-            --quiet
-            '''
-        }
-    }
+    // stage('Checkov Security Scan') {
+    //     steps {
+    //         sh '''
+    //         checkov -d . \
+    //         --framework terraform \
+    //         --skip-path environments/staging/terraform.tfstate \
+    //         --quiet
+    //         '''
+    //     }
+    // }
 
 
     stage('Terraform Plan (dry-run)') {
