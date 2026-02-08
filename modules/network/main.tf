@@ -132,18 +132,3 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private.id
 }
 
-# Route: Private subnet -> OpenVPN (VPN return path)
-# NOTE:
-# This route provides the return path from private subnets to VPN clients.
-# Traffic destined to the VPN CIDR is forwarded to the OpenVPN EC2 ENI.
-#
-# The OpenVPN ENI is created at runtime, therefore this route is considered
-# a late-binding dependency. In practice, this route may be applied
-# post-provisioning (e.g. via Ansible/AWS CLI) to avoid Terraform plan-time
-# ambiguity.
-
-resource "aws_route" "private_to_openvpn" {
-  route_table_id         = aws_route_table.private.id
-  destination_cidr_block = var.vpn_cidr
-  network_interface_id   = var.openvpn_eni_id
-}

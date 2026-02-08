@@ -25,17 +25,12 @@ variable "ssh_key_path" {
   description = "Path to SSH private key for Ansible"
 }
 
+# =========================
 # Ansible
+# =========================
 variable "ansible_inventory_dir" {
   type        = string
   description = "Base directory for Ansible inventories"
-}
-
-# =========================
-# AMI
-# =========================
-variable "ami" {
-  type = string
 }
 
 # =========================
