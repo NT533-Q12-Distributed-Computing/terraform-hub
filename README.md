@@ -1,58 +1,35 @@
 # Terraform Hub – Cloud-Native Infrastructure for Kubernetes
 
-This repository contains the **Infrastructure as Code (IaC)** implementation
-for provisioning **cloud-native Kubernetes infrastructure on AWS** using
-**Terraform**.
+This repository contains the **Infrastructure as Code (IaC)** implementation for provisioning **cloud-native Kubernetes infrastructure on AWS** using **Terraform**.
 
-The Terraform Hub is responsible for defining and managing all
-**infrastructure-layer resources**, while system configuration,
-Kubernetes bootstrapping, and observability deployment are handled
-separately by **Ansible**.
+The Terraform Hub is responsible for defining and managing all **infrastructure-layer resources**, while system configuration, Kubernetes bootstrapping, and observability deployment are handled separately by **Ansible**.
 
 ---
 
 ## 1. Overview
 
-The objective of this project is to design and provision a
-**cloud-native infrastructure foundation** capable of supporting
-Kubernetes clusters in environments that closely resemble
-real-world production deployments.
-
-Key design principles include:
-
-- Modular and reusable infrastructure design
-- Clear separation between infrastructure provisioning and configuration management
-- Secure and Kubernetes-ready network architecture
-- Environment-based infrastructure isolation
-- Automation-friendly Terraform outputs for downstream tools
+The objective of this project is to design and provision a **cloud-native infrastructure foundation** capable of supporting Kubernetes clusters in environments that closely resemble real-world production deployments.
 
 ---
 
-## 2. Infrastructure Provisioning Architecture
+## 2. Infrastructure Overview
 
-The infrastructure is provisioned using Terraform with a
-**module-based architecture**.
+The infrastructure is provisioned using Terraform with a **module-based architecture**.
 
-Each Terraform module is responsible for a specific layer of the
-infrastructure, including:
+Each Terraform module is responsible for a specific layer of the infrastructure, including:
 
 - Networking and routing
 - Security and IAM
 - Compute resources for Kubernetes platforms
 - Supporting cloud-native components
 
-Terraform outputs are intentionally structured to be consumed by
-external automation tools, enabling seamless integration with
-configuration management and operational workflows.
+Terraform outputs are intentionally structured to be consumed by external automation tools, enabling seamless integration with configuration management and operational workflows.
 
 ---
 
 ## 2.1 Staging Environment
 
-The **staging environment** serves as a controlled platform for
-provisioning and validating a Kubernetes-ready infrastructure
-before applying similar architectural patterns to production
-environments.
+The **staging environment** serves as a controlled platform for provisioning and validating a Kubernetes-ready infrastructure before applying similar architectural patterns to production environments.
 
 ![Staging Environment Architecture](images/staging-env.png)
 
@@ -74,21 +51,15 @@ isolation, and Kubernetes compatibility.
 
 ## 2.2 Production Environment
 
-The **production environment** represents a highly available,
-secure, and cloud-native Kubernetes platform deployed on
-**Amazon Elastic Kubernetes Service (EKS)**.
+The **production environment** represents a highly available, secure, and cloud-native Kubernetes platform deployed on **Amazon Elastic Kubernetes Service (EKS)**.
 
-This environment is designed to closely reflect real-world
-enterprise Kubernetes deployments on AWS, with an emphasis on
-scalability, resilience, and operational best practices.
+This environment is designed to closely reflect real-world enterprise Kubernetes deployments on AWS, with an emphasis on scalability, resilience, and operational best practices.
 
 ![Production Environment Architecture](images/prod-env.png)
 
 ### Production Environment Overview
 
-The production architecture is deployed within a dedicated
-**AWS VPC** and spans **multiple Availability Zones (AZs)** to
-ensure high availability and fault tolerance.
+The production architecture is deployed within a dedicated **AWS VPC** and spans **multiple Availability Zones (AZs)** to ensure high availability and fault tolerance.
 
 At a high level, the production environment consists of:
 
@@ -100,9 +71,7 @@ At a high level, the production environment consists of:
 - Public access to applications via an Application Load Balancer (ALB)
 - Controlled outbound internet access via a NAT Gateway
 
-This design follows AWS and Kubernetes best practices by isolating
-application workloads in private subnets while exposing only
-well-defined entry points to the public internet.
+This design follows AWS and Kubernetes best practices by isolating application workloads in private subnets while exposing only well-defined entry points to the public internet.
 
 ---
 
@@ -157,7 +126,43 @@ well-defined entry points to the public internet.
 
 ---
 
-## 3. Repository Scope and Responsibilities
+## 3. Setup and Provisioning
+
+Clone the repository along with its submodules:
+
+```bash
+git clone --recurse-submodules https://github.com/tienphatng237/cloud-native-k8s-infrastructure.git
+```
+
+Navigate to the Terraform Hub and select the target environment:
+
+```bash
+cd cloud-native-k8s-infrastructure/terraform-hub/environments/<environment>
+```
+
+Initialize and validate the Terraform configuration:
+
+```bash
+terraform init
+terraform validate
+```
+
+Review the execution plan:
+
+```bash
+terraform plan
+```
+
+Provision the infrastructure:
+
+```bash
+terraform apply
+```
+
+After the apply step completes, Terraform outputs will expose infrastructure metadata that can be consumed by Ansible for subsequent configuration and Kubernetes bootstrapping steps.
+
+---
+## 4. Repository Scope and Responsibilities
 
 This repository is responsible for:
 
@@ -180,8 +185,4 @@ These responsibilities are handled by the **Ansible Hub**.
 
 ## Author
 
-This project is developed as part of a
-**cloud-native infrastructure and DevOps study**,
-with an emphasis on infrastructure design,
-Kubernetes platforms, and production-ready
-architecture patterns.
+This project is developed as part of a **cloud-native infrastructure and DevOps study**, with an emphasis on infrastructure design, Kubernetes platforms, and production-ready architecture patterns.
