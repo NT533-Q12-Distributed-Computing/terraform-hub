@@ -9,6 +9,17 @@ ssh_key_path    = "../../../key_pair/k0s_key"
 # Networking
 vpc_cidr = "10.0.0.0/16"
 
+az_count = 3
+
+subnet_newbits = 8
+
+private_subnet_indexes = [1, 2, 3, 4, 5]
+public_subnet_indexes  = [10, 11, 12]
+
+observability_subnet_slice = [3, 5]
+
+openvpn_public_subnet_index = 2
+
 # =========================
 # Compute
 # =========================
@@ -25,3 +36,7 @@ openvpn_instance_type       = "t3.micro"
 
 # Ansible
 ansible_inventory_dir = "../../../ansible-hub/inventories/staging"
+
+# Application Load Balancer
+alb_target_port = 30080
+environment = "staging"

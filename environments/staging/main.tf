@@ -38,26 +38,21 @@ locals {
   my_ip_cidr = "${trimspace(data.http.my_ip.response_body)}/32"
 
   # Use first 3 AZs for staging environment
-  azs = slice(data.aws_availability_zones.available.names, 0, 3)
-
-  # Subnet calculation configuration
-  subnet_newbits = 8
-
-  # Private subnets (5)
-  private_subnet_indexes = [1, 2, 3, 4, 5]
-
-  # Public subnets (3 AZs)
-  public_subnet_indexes = [10, 11, 12]
+  azs = slice(
+    data.aws_availability_zones.available.names,
+    0,
+    var.az_count
+  )
 
   # Private subnets (Kubernetes nodes, observability, internal services)
   private_subnets = [
-    for i in local.private_subnet_indexes :
-    cidrsubnet(var.vpc_cidr, local.subnet_newbits, i)
+    for i in var.private_subnet_indexes :
+    cidrsubnet(var.vpc_cidr, var.subnet_newbits, i)
   ]
 
   public_subnets = [
-    for i in local.public_subnet_indexes :
-    cidrsubnet(var.vpc_cidr, local.subnet_newbits, i)
+    for i in var.public_subnet_indexes :
+    cidrsubnet(var.vpc_cidr, var.subnet_newbits, i)
   ]
 }
 
@@ -122,7 +117,11 @@ module "observability" {
   key_name      = module.keypair.key_name
 
   # Dedicated subnets for observability stack
-  private_subnet_ids = slice(module.network.private_subnet_ids, 3, 5)
+  private_subnet_ids = slice(
+    module.network.private_subnet_ids,
+    var.observability_subnet_slice[0],
+    var.observability_subnet_slice[1]
+  )
 
   observability_sg_id = module.security.observability_sg_id
 }
@@ -137,7 +136,7 @@ module "openvpn" {
   ami              = data.aws_ami.ubuntu_2204.id
   instance_type    = var.openvpn_instance_type
   key_name         = module.keypair.key_name
-  public_subnet_id = module.network.public_subnet_ids[2]
+  public_subnet_id = module.network.public_subnet_ids[var.openvpn_public_subnet_index]
   openvpn_sg_id    = module.security.openvpn_sg_id
 }
 
@@ -147,12 +146,12 @@ module "openvpn" {
 module "alb" {
   source = "../../modules/alb"
 
-  name       = "staging-k0s-alb"
+  name = "${var.environment}-k0s-alb"
   vpc_id     = module.network.vpc_id
   subnet_ids = module.network.public_subnet_ids
   alb_sg_id  = module.security.alb_sg_id
 
   target_type  = "instance"
-  target_port  = 30080 # NGINX Ingress NodePort
+  target_port = var.alb_target_port
   instance_ids = module.k0s.instance_ids
 }
