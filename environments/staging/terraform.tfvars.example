@@ -8,6 +8,7 @@ ssh_key_path    = "../../../key_pair/k0s_key"
 
 # Networking
 vpc_cidr = "10.0.0.0/16"
+vpn_cidr = "10.8.0.0/24"
 
 az_count = 3
 

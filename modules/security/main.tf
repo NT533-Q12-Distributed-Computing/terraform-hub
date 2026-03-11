@@ -1,14 +1,49 @@
+locals {
+  vpn_cidrs = var.vpn_cidr == null ? [] : [var.vpn_cidr]
+  observability_access_cidrs = var.vpn_cidr == null ? [var.vpc_cidr] : [
+    var.vpc_cidr,
+    var.vpn_cidr,
+  ]
+}
+
 resource "aws_security_group" "k0s" {
   name   = "k0s-staging-sg"
   vpc_id = var.vpc_id
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["10.8.0.0/24"]
+  dynamic "ingress" {
+    for_each = local.vpn_cidrs
+    content {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = [ingress.value]
+      description = "SSH from VPN clients"
+    }
   }
 
+  dynamic "ingress" {
+    for_each = local.vpn_cidrs
+    content {
+      from_port   = 6443
+      to_port     = 6443
+      protocol    = "tcp"
+      cidr_blocks = [ingress.value]
+      description = "Kubernetes API from VPN clients"
+    }
+  }
+
+  dynamic "ingress" {
+    for_each = local.vpn_cidrs
+    content {
+      from_port   = -1
+      to_port     = -1
+      protocol    = "icmp"
+      cidr_blocks = [ingress.value]
+      description = "ICMP from VPN clients"
+    }
+  }
+
+  # Internal cluster traffic
   ingress {
     from_port   = 0
     to_port     = 0
@@ -54,12 +89,26 @@ resource "aws_security_group" "observability" {
   name   = "observability-staging-sg"
   vpc_id = var.vpc_id
 
-  # SSH từ VPN (OpenVPN subnet)
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["10.8.0.0/24"]
+  dynamic "ingress" {
+    for_each = local.vpn_cidrs
+    content {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = [ingress.value]
+      description = "SSH from VPN clients"
+    }
+  }
+
+  dynamic "ingress" {
+    for_each = local.vpn_cidrs
+    content {
+      from_port   = -1
+      to_port     = -1
+      protocol    = "icmp"
+      cidr_blocks = [ingress.value]
+      description = "ICMP from VPN clients"
+    }
   }
 
   # Grafana
@@ -67,7 +116,7 @@ resource "aws_security_group" "observability" {
     from_port   = 3000
     to_port     = 3000
     protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
+    cidr_blocks = local.observability_access_cidrs
   }
 
   # Prometheus
@@ -75,7 +124,7 @@ resource "aws_security_group" "observability" {
     from_port   = 9090
     to_port     = 9090
     protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
+    cidr_blocks = local.observability_access_cidrs
   }
 
   # Loki
@@ -83,7 +132,7 @@ resource "aws_security_group" "observability" {
     from_port   = 3100
     to_port     = 3100
     protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
+    cidr_blocks = local.observability_access_cidrs
   }
 
   # Tempo (OTLP gRPC + HTTP)
@@ -91,7 +140,7 @@ resource "aws_security_group" "observability" {
     from_port   = 4317
     to_port     = 4318
     protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
+    cidr_blocks = local.observability_access_cidrs
   }
 
   egress {

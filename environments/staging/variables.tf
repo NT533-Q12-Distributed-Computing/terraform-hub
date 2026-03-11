@@ -9,6 +9,11 @@ variable "vpc_cidr" {
   type = string
 }
 
+variable "vpn_cidr" {
+  type        = string
+  description = "OpenVPN client subnet CIDR"
+}
+
 # =========================
 # SSH
 # =========================

@@ -97,6 +97,7 @@ module "security" {
   vpc_id     = module.network.vpc_id
   vpc_cidr   = var.vpc_cidr
   my_ip_cidr = local.my_ip_cidr
+  vpn_cidr   = var.vpn_cidr
 }
 
 # =========================
@@ -142,6 +143,19 @@ module "openvpn" {
   key_name         = module.keypair.key_name
   public_subnet_id = module.network.public_subnet_ids[var.openvpn_public_subnet_index]
   openvpn_sg_id    = module.security.openvpn_sg_id
+}
+
+moved {
+  from = aws_route.private_to_openvpn
+  to   = module.openvpn_routing.aws_route.private_to_openvpn
+}
+
+module "openvpn_routing" {
+  source = "../../modules/routing/openvpn"
+
+  private_route_table_id = module.network.private_route_table_id
+  vpn_cidr               = var.vpn_cidr
+  openvpn_eni_id         = module.openvpn.eni_id
 }
 
 # =========================
