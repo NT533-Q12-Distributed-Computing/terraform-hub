@@ -9,14 +9,13 @@ variable "vpc_id" {
 
 variable "subnet_ids" {
   type        = list(string)
-  description = "Public subnets for ALB"
+  description = "Public subnets for the ALB"
 }
 
 variable "alb_sg_id" {
   type = string
 }
 
-# Listener
 variable "listener_port" {
   type    = number
   default = 80
@@ -27,10 +26,10 @@ variable "listener_protocol" {
   default = "HTTP"
 }
 
-# Target Group
 variable "target_port" {
   type        = number
-  description = "Port exposed by backend (NodePort or Service port)"
+  description = "Backend port exposed by Grafana"
+  default     = 3000
 }
 
 variable "target_protocol" {
@@ -38,28 +37,17 @@ variable "target_protocol" {
   default = "HTTP"
 }
 
-variable "target_type" {
-  type        = string
-  description = "instance (k0s) or ip (EKS)"
-  validation {
-    condition     = contains(["instance", "ip"], var.target_type)
-    error_message = "target_type must be instance or ip"
-  }
-}
-
 variable "health_check_path" {
   type    = string
-  default = "/"
+  default = "/api/health"
 }
 
-# k0s only
-variable "instance_ids" {
-  type    = list(string)
-  default = []
+variable "health_check_matcher" {
+  type    = string
+  default = "200"
 }
 
-# EKS only
-variable "target_ips" {
-  type    = list(string)
-  default = []
+variable "target_ip" {
+  type        = string
+  description = "Grafana private IP attached behind the ALB"
 }

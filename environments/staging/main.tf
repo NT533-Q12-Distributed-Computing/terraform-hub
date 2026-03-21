@@ -161,15 +161,30 @@ module "openvpn_routing" {
 # =========================
 # APPLICATION LOAD BALANCER
 # =========================
-module "alb" {
-  source = "../../modules/alb"
+moved {
+  from = module.alb
+  to   = module.kubernetes_alb
+}
+
+module "kubernetes_alb" {
+  source = "../../modules/alb/kubernetes"
 
   name       = "${var.environment}-k0s-alb"
   vpc_id     = module.network.vpc_id
   subnet_ids = module.network.public_subnet_ids
   alb_sg_id  = module.security.alb_sg_id
 
-  target_type  = "instance"
   target_port  = var.alb_target_port
   instance_ids = module.k0s.instance_ids
+}
+
+module "observability_alb" {
+  source = "../../modules/alb/observability"
+
+  name       = "${var.environment}-grafana-alb"
+  vpc_id     = module.network.vpc_id
+  subnet_ids = module.network.public_subnet_ids
+  alb_sg_id  = module.security.alb_sg_id
+
+  target_ip = module.observability.nodes["obser_01"].private_ip
 }

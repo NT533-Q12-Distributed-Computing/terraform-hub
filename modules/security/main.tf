@@ -1,9 +1,5 @@
 locals {
   vpn_cidrs = var.vpn_cidr == null ? [] : [var.vpn_cidr]
-  observability_access_cidrs = var.vpn_cidr == null ? [var.vpc_cidr] : [
-    var.vpc_cidr,
-    var.vpn_cidr,
-  ]
 }
 
 resource "aws_security_group" "k0s" {
@@ -85,6 +81,26 @@ resource "aws_security_group" "openvpn" {
   }
 }
 
+resource "aws_security_group" "alb" {
+  name   = "alb-sg"
+  vpc_id = var.vpc_id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTP from the internet"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_security_group" "observability" {
   name   = "observability-staging-sg"
   vpc_id = var.vpc_id
@@ -111,55 +127,59 @@ resource "aws_security_group" "observability" {
     }
   }
 
-  # Grafana
   ingress {
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    cidr_blocks = local.observability_access_cidrs
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+    description     = "Grafana from the ALB"
   }
 
-  # Prometheus
   ingress {
     from_port   = 9090
     to_port     = 9090
     protocol    = "tcp"
-    cidr_blocks = local.observability_access_cidrs
+    cidr_blocks = [var.vpc_cidr]
+    description = "Prometheus from VPC workloads"
   }
 
-  # Loki
   ingress {
     from_port   = 3100
     to_port     = 3100
     protocol    = "tcp"
-    cidr_blocks = local.observability_access_cidrs
+    cidr_blocks = [var.vpc_cidr]
+    description = "Loki from VPC workloads"
   }
 
-  # Tempo (OTLP gRPC + HTTP)
+  ingress {
+    from_port   = 3200
+    to_port     = 3200
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+    description = "Tempo query API from VPC workloads"
+  }
+
   ingress {
     from_port   = 4317
     to_port     = 4318
     protocol    = "tcp"
-    cidr_blocks = local.observability_access_cidrs
+    cidr_blocks = [var.vpc_cidr]
+    description = "Tempo OTLP from VPC workloads"
   }
 
   egress {
-    from_port = 0
-    to_port   = 0
-    # allow all outbound
+    from_port   = 0
+    to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
-# EKS Control Plane Security Group 
 resource "aws_security_group" "eks_control_plane" {
   count  = var.eks_cluster_security_group_id == null ? 0 : 1
   name   = "eks-control-plane-sg"
   vpc_id = var.vpc_id
 
-
-  # Control plane ↔ Node communication
   ingress {
     from_port   = 443
     to_port     = 443
@@ -175,13 +195,11 @@ resource "aws_security_group" "eks_control_plane" {
   }
 }
 
-# EKS Node Group Security Group
 resource "aws_security_group" "eks_nodes" {
   count  = var.eks_cluster_security_group_id == null ? 0 : 1
   name   = "eks-nodes-sg"
   vpc_id = var.vpc_id
 
-  # Node to node communication
   ingress {
     from_port   = 0
     to_port     = 65535
@@ -189,7 +207,6 @@ resource "aws_security_group" "eks_nodes" {
     cidr_blocks = [var.vpc_cidr]
   }
 
-  # Kubelet API
   ingress {
     from_port   = 10250
     to_port     = 10250
@@ -197,7 +214,6 @@ resource "aws_security_group" "eks_nodes" {
     cidr_blocks = [var.vpc_cidr]
   }
 
-  # Control plane to node
   ingress {
     from_port   = 443
     to_port     = 443
@@ -213,7 +229,6 @@ resource "aws_security_group" "eks_nodes" {
   }
 }
 
-# Rule for kubectl from VPN
 resource "aws_security_group_rule" "eks_api_from_vpn" {
   count = (
     var.vpn_cidr != null && var.eks_cluster_security_group_id != null
@@ -228,23 +243,4 @@ resource "aws_security_group_rule" "eks_api_from_vpn" {
   security_group_id = var.eks_cluster_security_group_id
 
   description = "Allow kubectl access to EKS private endpoint from VPN"
-}
-
-resource "aws_security_group" "alb" {
-  name   = "alb-sg"
-  vpc_id = var.vpc_id
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }

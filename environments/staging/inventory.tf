@@ -6,11 +6,11 @@ resource "local_file" "kubernetes_inventory" {
 
   content = <<-EOF
 [k0s_controller]
-controller ansible_host=${module.k0s.controller.private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=${abspath(var.ssh_key_path)}
+controller ansible_host=${module.k0s.controller.private_ip} ansible_user=ubuntu
 
 [k0s_workers]
 %{for idx, inst in module.k0s.workers~}
-worker-${idx + 1} ansible_host=${inst.private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=${abspath(var.ssh_key_path)}
+worker-${idx + 1} ansible_host=${inst.private_ip} ansible_user=ubuntu
 %{endfor~}
 
 [k0s_cluster:children]
@@ -27,10 +27,10 @@ resource "local_file" "observability_inventory" {
 
   content = <<-EOF
 [monitoring]
-obser-1 ansible_host=${module.observability.nodes["obser_01"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=${abspath(var.ssh_key_path)}
+obser-1 ansible_host=${module.observability.nodes["obser_01"].private_ip} ansible_user=ubuntu
 
 [logging]
-obser-2 ansible_host=${module.observability.nodes["obser_02"].private_ip} ansible_user=ubuntu ansible_ssh_private_key_file=${abspath(var.ssh_key_path)}
+obser-2 ansible_host=${module.observability.nodes["obser_02"].private_ip} ansible_user=ubuntu
 
 [all:vars]
 loki_host=${module.observability.nodes["obser_02"].private_ip}
@@ -45,6 +45,6 @@ resource "local_file" "openvpn_inventory" {
 
   content = <<-EOF
 [openvpn]
-vpn ansible_host=${module.openvpn.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=${abspath(var.ssh_key_path)}
+vpn ansible_host=${module.openvpn.public_ip} ansible_user=ubuntu
 EOF
 }

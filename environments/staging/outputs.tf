@@ -26,3 +26,14 @@ output "k0s_workers_private_ips" {
 output "observability_private_ips" {
   value = [for o in module.observability.instances : o.private_ip]
 }
+
+# ================================
+# Application Load Balancers
+# ================================
+output "kubernetes_alb_dns_name" {
+  value = module.kubernetes_alb.alb_dns_name
+}
+
+output "observability_alb_dns_name" {
+  value = module.observability_alb.alb_dns_name
+}
