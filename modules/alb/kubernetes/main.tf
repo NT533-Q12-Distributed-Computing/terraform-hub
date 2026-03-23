@@ -11,14 +11,19 @@ resource "aws_lb" "this" {
 }
 
 resource "aws_lb_target_group" "this" {
-  name        = "${var.name}-tg"
+  name_prefix = "k0s-"
   port        = var.target_port
   protocol    = var.target_protocol
   vpc_id      = var.vpc_id
   target_type = "instance"
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   health_check {
-    path = var.health_check_path
+    path    = var.health_check_path
+    matcher = var.health_check_matcher
   }
 }
 

@@ -174,8 +174,9 @@ module "kubernetes_alb" {
   subnet_ids = module.network.public_subnet_ids
   alb_sg_id  = module.security.alb_sg_id
 
-  target_port  = var.alb_target_port
-  instance_ids = module.k0s.instance_ids
+  target_port          = var.alb_target_port
+  health_check_matcher = "200-404"
+  instance_ids         = module.k0s.worker_instance_ids
 }
 
 module "observability_alb" {

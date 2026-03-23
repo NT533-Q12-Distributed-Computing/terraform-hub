@@ -71,5 +71,5 @@ openvpn_instance_type       = "t3.micro"
 ansible_inventory_dir = "../../../ansible-hub/inventories/staging"
 
 # Application Load Balancer
-alb_target_port = 30080
-environment = "staging"
+alb_target_port = 30293
+environment     = "staging"

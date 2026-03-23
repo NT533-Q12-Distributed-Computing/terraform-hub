@@ -8,11 +8,15 @@ resource "aws_lb" "this" {
 }
 
 resource "aws_lb_target_group" "this" {
-  name        = substr(replace("${var.name}-tg", "_", "-"), 0, 32)
+  name_prefix = "graf-"
   port        = var.target_port
   protocol    = var.target_protocol
   vpc_id      = var.vpc_id
   target_type = "ip"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   health_check {
     path    = var.health_check_path

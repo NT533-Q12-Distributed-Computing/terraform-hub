@@ -41,6 +41,12 @@ variable "health_check_path" {
   default = "/"
 }
 
+variable "health_check_matcher" {
+  type        = string
+  description = "Expected HTTP codes for ALB health checks"
+  default     = "200"
+}
+
 variable "instance_ids" {
   type        = list(string)
   description = "Kubernetes EC2 instance IDs attached behind the ALB"
