@@ -117,7 +117,8 @@ module "k0s" {
 
 # =========================
 # OBSERVABILITY NODES
-# PROMETHEUS / LOKI / TEMPO / GRAFANA
+# GRAFANA / PROMETHEUS
+# RL staging only uses obser_01.
 # =========================
 module "observability" {
   source = "../../modules/compute/observability"
