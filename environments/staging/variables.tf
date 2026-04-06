@@ -73,8 +73,8 @@ variable "observ_subnet_indexes" {
   type = list(number)
 
   validation {
-    condition     = length(var.observ_subnet_indexes) == 3
-    error_message = "observ_subnet_indexes must contain exactly 3 indexes."
+    condition     = length(var.observ_subnet_indexes) == 1
+    error_message = "observ_subnet_indexes must contain exactly 1 index for RL staging."
   }
 }
 
@@ -106,7 +106,7 @@ variable "k0s_nodes" {
 }
 
 variable "observability_nodes" {
-  description = "Static placement plan for staging observability and storage nodes"
+  description = "Static placement plan for staging observability nodes"
   type = map(object({
     subnet_index = number
     private_ip   = string
@@ -114,17 +114,14 @@ variable "observability_nodes" {
 
   validation {
     condition = (
-      length(var.observability_nodes) == 2 &&
-      alltrue([
-        for key in ["obser_01", "obser_02"] :
-        contains(keys(var.observability_nodes), key)
-      ]) &&
+      length(var.observability_nodes) >= 1 &&
+      contains(keys(var.observability_nodes), "obser_01") &&
       alltrue([
         for node in values(var.observability_nodes) :
-        node.subnet_index >= 0 && node.subnet_index < 3
+        node.subnet_index >= 0 && node.subnet_index < length(var.observ_subnet_indexes)
       ])
     )
-    error_message = "observability_nodes must define obser_01 and obser_02 and each subnet_index must be between 0 and 2."
+    error_message = "observability_nodes must define obser_01 and each subnet_index must be valid for the configured observability subnets."
   }
 }
 
