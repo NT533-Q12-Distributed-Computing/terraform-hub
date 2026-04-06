@@ -16,3 +16,8 @@ moved {
   from = aws_instance.observability_node["prometheus"]
   to   = aws_instance.observability_node["obser_01"]
 }
+
+moved {
+  from = aws_instance.observability_node["loki"]
+  to   = aws_instance.observability_node["obser_02"]
+}

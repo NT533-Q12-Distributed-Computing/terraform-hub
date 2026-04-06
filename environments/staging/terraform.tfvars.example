@@ -15,7 +15,7 @@ subnet_newbits = 8
 
 public_subnet_indexes = [1, 2, 3]
 k8s_subnet_indexes    = [11, 12, 13]
-observ_subnet_indexes = [21]
+observ_subnet_indexes = [21, 22, 23]
 
 openvpn_public_subnet_index = 2
 
@@ -47,10 +47,10 @@ observability_nodes = {
     private_ip   = "10.0.21.10"
   }
 
-  # obser_02 = {
-  #   subnet_index = 1
-  #   private_ip   = "10.0.22.10"
-  # }
+  obser_02 = {
+    subnet_index = 1
+    private_ip   = "10.0.22.10"
+  }
 }
 
 # =========================
